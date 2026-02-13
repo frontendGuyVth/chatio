@@ -4,6 +4,7 @@ import path from "path";
 
 import authRoutes from "./routes/auth.route.js"
 import messageRoutes from "./routes/message.route.js"
+import {connectDB} from "../src/lib/db.js"
 
 dotenv.config()
 const app = express();
@@ -24,4 +25,5 @@ if(process.env.NODE_ENV === "production") {
 }
 app.listen(PORT, () => {
     console.log(`Serving in port ${PORT}`)
+    connectDB()
 })
