@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs/dist/bcrypt.js";
 import User from "../models/User.js";
 import bycrpt from "bcryptjs";
-import {generateToken} from "../lib/utils.js"
+import { generateToken } from "../lib/utils.js";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -25,29 +25,30 @@ export const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = new User({
-        fullName,
-        email,
-        password: hashedPassword
-    })
+      fullName,
+      email,
+      password: hashedPassword,
+    });
 
-    if(newUser) {
-     generateToken(newUser._id, res);
-     await newUser.save();
+    if (newUser) {
+      
+      //Persist user first, then issue auth cookie
+      const savedUser = await newUser.save();
+      generateToken(savedUser._id, res);
 
-     res.status(201).json({
+      res.status(201).json({
         _id: newUser._id,
         fullName: newUser.fullName,
         email: newUser.email,
-        profilePic: newUser.profilePic
-     })
+        profilePic: newUser.profilePic,
+      });
 
-     // todo: send a welcome email to user 
+      // todo: send a welcome email to user
     } else {
-        res.status(400).json({ message: "Invalid user data" });
+      res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
     console.log("Error in signup Controller:", error);
     res.status(500).json({ message: "Internal  server error" });
   }
-  
 };
